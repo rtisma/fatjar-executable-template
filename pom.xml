@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.roberttisma.template</groupId>
+    <artifactId>fatjar-executable</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <dependencies>
+
+		<!--Logging-->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+		<!--Utility Libs-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+            <version>${lombok.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+		<!-- Testing -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+        </dependency>
+    </dependencies>
+	<build>
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>${plugin.fmt.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <release>11</release>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <showWarnings>true</showWarnings>
+                        <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                        <verbose>true</verbose>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <!-- update compiler plugin dependency on
+                            ASM for Java 11 compatibility -->
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>6.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <!-- Test -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <forkCount>1</forkCount>
+                        <reuseForks>false</reuseForks>
+                        <argLine>-Xms256m -Xmx1g</argLine>
+                        <redirectTestOutputToFile>${test.redirectTestOutputToFile}</redirectTestOutputToFile>
+                        <useFile>${test.useFile}</useFile>
+                        <systemProperties>
+                            <java.awt.headless>true</java.awt.headless>
+                        </systemProperties>
+                        <argLine>
+                            --illegal-access=permit
+                        </argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${plugin.maven.dependency.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.shared</groupId>
+                            <artifactId>maven-dependency-analyzer</artifactId>
+                            <version>${maven.dependency.analyzer.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.roberttisma.template.fatjar_executable.Main</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+					<execution>
+						<id>create-dist</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<attach>true</attach>
+							<descriptors>
+								<descriptor>src/main/assembly/bin.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+            </plugins>
+    </build>
+    <properties>
+		<!-- Project-->
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <test.redirectTestOutputToFile>true</test.redirectTestOutputToFile>
+        <test.useFile>true</test.useFile>
+
+		
+		<!-- Libs-->
+        <picocli.version>4.0.4</picocli.version>
+        <slf4j.version>1.7.29</slf4j.version>
+        <logback.version>1.2.3</logback.version>
+		<junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <mockito.version>3.2.0</mockito.version>
+        <assertj-core.version>1.7.1</assertj-core.version>
+        <guava.version>28.1-jre</guava.version>
+        <lombok.version>1.18.10</lombok.version>
+        <slf4j.version>1.7.5</slf4j.version>
+		<unirest.version>3.1.00</unirest.version>
+        <jackson.version>2.10.0</jackson.version>
+
+		<!--  Plugins-->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <plugin.fmt.version>2.9</plugin.fmt.version>
+        <maven.dependency.analyzer.version>1.11.1</maven.dependency.analyzer.version>
+		<plugin.maven.dependency.version>3.1.1</plugin.maven.dependency.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
+    </properties>
+
+
+</project>
